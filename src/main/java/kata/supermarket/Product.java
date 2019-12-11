@@ -1,20 +1,13 @@
 package kata.supermarket;
 
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-public class Product {
+import java.util.UUID;
 
-    private final BigDecimal pricePerUnit;
-
-    public Product(final BigDecimal pricePerUnit) {
-        this.pricePerUnit = pricePerUnit;
-    }
-
-    BigDecimal pricePerUnit() {
-        return pricePerUnit;
-    }
-
-    public Item oneOf() {
-        return new ItemByUnit(this);
-    }
+@AllArgsConstructor
+@Getter
+public abstract class Product {
+    private final UUID id;
+    private final DiscountType discountType;
 }
