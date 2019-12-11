@@ -7,3 +7,6 @@ lombok dependency has been added to reduce the code
 Decisions
 As there will be some common features like product id and discount type for both unit product and weighed product
 it has been decided to generalise them in to an abstract class Product
+
+Assumptions
+Weighed products don't have any discount. so that the no discount is added by default.

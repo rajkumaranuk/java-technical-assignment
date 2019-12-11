@@ -11,7 +11,10 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static kata.supermarket.DiscountType.BUY_ONE_GET_ONE_FREE;
 import static kata.supermarket.DiscountType.NO_DISCOUNT;
+import static kata.supermarket.DiscountType.THREE_FOR_THE_PRICE_OF_TWO;
+import static kata.supermarket.DiscountType.TWO_FOR_ONE_POUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BasketTest {
@@ -29,7 +32,11 @@ class BasketTest {
         return Stream.of(
                 noItems(),
                 aSingleItemPricedPerUnit(),
-                multipleItemsPricedPerUnit(),
+                multipleItemsPricedPerUnitWithNoDiscount(),
+                multipleItemsPricedPerUnitWithBuyOneGetOneFree(),
+                multipleItemsPricedPerUnitWithTwoForOnePound(),
+                multipleItemsPricedPerUnitWithThreeForThePriceOfTwo(),
+                multipleItemsPricedPerUnitWithMixedDiscounts(),
                 aSingleItemPricedByWeight(),
                 multipleItemsPricedByWeight()
         );
@@ -45,9 +52,45 @@ class BasketTest {
         );
     }
 
-    private static Arguments multipleItemsPricedPerUnit() {
-        return Arguments.of("multiple items priced per unit", "2.04",
+    private static Arguments multipleItemsPricedPerUnitWithNoDiscount() {
+        return Arguments.of("multiple items with no discount priced per unit", "2.04",
                 Arrays.asList(aPackOfDigestives(), aPintOfMilk()));
+    }
+
+    private static Arguments multipleItemsPricedPerUnitWithBuyOneGetOneFree() {
+        final UUID id = UUID.randomUUID();
+        return Arguments.of("buy 1 get 1 free items priced per unit", "3.87",
+                Arrays.asList(aChocolateBar(id), aChocolateBar(id), aChocolateBar(id), aChocolateBar(id), aChocolateBar(id)));
+    }
+
+    private static Arguments multipleItemsPricedPerUnitWithTwoForOnePound() {
+        final UUID id = UUID.randomUUID();
+        return Arguments.of("buy 2 for 1 pound priced per unit", "2.69",
+                Arrays.asList(aPackOfSugar(id), aPackOfSugar(id), aPackOfSugar(id), aPackOfSugar(id), aPackOfSugar(id)));
+    }
+
+    private static Arguments multipleItemsPricedPerUnitWithThreeForThePriceOfTwo() {
+        final UUID id = UUID.randomUUID();
+        return Arguments.of("3 for the price of 2 priced per unit", "6.00",
+                Arrays.asList(aMango(id), aMango(id), aMango(id), aMango(id), aMango(id)));
+    }
+
+    private static Arguments multipleItemsPricedPerUnitWithMixedDiscounts() {
+        final UUID chocolateId = UUID.randomUUID();
+        final UUID sugarId = UUID.randomUUID();
+        final UUID mangoId = UUID.randomUUID();
+        final UUID cheeseId = UUID.randomUUID();
+        return Arguments.of("multiple items with mixed discount priced per unit", "9.08",
+                Arrays.asList(aChocolateBar(chocolateId),
+                        aPackOfSugar(sugarId),
+                        aPackOfSugar(sugarId),
+                        aChocolateBar(chocolateId),
+                        aChocolateBar(chocolateId),
+                        aMango(mangoId),
+                        aMango(mangoId),
+                        aCheeseBag(cheeseId),
+                        aCheeseBag(cheeseId),
+                        aMango(mangoId)));
     }
 
     private static Arguments aSingleItemPricedPerUnit() {
@@ -64,6 +107,22 @@ class BasketTest {
 
     private static Item aPackOfDigestives() {
         return new UnitProduct(UUID.randomUUID(), NO_DISCOUNT, new BigDecimal("1.55")).oneOf();
+    }
+
+    private static Item aChocolateBar(final UUID id) {
+        return new UnitProduct(id, BUY_ONE_GET_ONE_FREE, new BigDecimal("1.29")).oneOf();
+    }
+
+    private static Item aCheeseBag(final UUID id) {
+        return new UnitProduct(id, BUY_ONE_GET_ONE_FREE, new BigDecimal("2.50")).oneOf();
+    }
+
+    private static Item aPackOfSugar(final UUID id) {
+        return new UnitProduct(id, TWO_FOR_ONE_POUND, new BigDecimal("0.69")).oneOf();
+    }
+
+    private static Item aMango(final UUID id) {
+        return new UnitProduct(id, THREE_FOR_THE_PRICE_OF_TWO, new BigDecimal("1.50")).oneOf();
     }
 
     private static WeighedProduct aKiloOfAmericanSweets() {

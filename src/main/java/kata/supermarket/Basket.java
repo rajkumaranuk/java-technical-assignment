@@ -5,6 +5,9 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Basket {
     private final List<Item> items;
@@ -19,6 +22,13 @@ public class Basket {
 
     List<Item> items() {
         return Collections.unmodifiableList(items);
+    }
+
+    Map<UUID, List<Item>> groupedItemsMap() {
+        return items.stream()
+                .collect(Collectors.groupingBy(
+                        Item::productId,
+                        Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList)));
     }
 
     public BigDecimal total() {
@@ -40,7 +50,14 @@ public class Basket {
         }
 
         private BigDecimal discounts() {
-            return BigDecimal.ZERO;
+            return groupedItemsMap().values()
+                    .stream()
+                    .map(groupedItems -> {
+                        final DiscountType discountType = groupedItems.get(0).discountType();
+                        final BigDecimal basePrice = groupedItems.get(0).price();
+                        return discountType.getDiscountStrategy().discountAmount(basePrice, groupedItems.size());
+                    })
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
 
         private BigDecimal calculate() {
